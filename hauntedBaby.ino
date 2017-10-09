@@ -27,11 +27,10 @@
 #define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
 
 // These are the pins used by the haunted baby
-#define MotionLED 13 // built in led
-#define RelayEYEs 2 // eyes on the baby
-#define RelayEXTEND 0 // extend the baby
-#define RelayRETRACT 1 // shrink
-#define MotionDETECT 12 // PIR
+#define RelayEYEs A1 // eyes on the baby
+#define RelayEXTEND A3 // extend the baby
+#define RelayRETRACT A4 // shrink
+#define MotionDETECT A0 // PIR
 
 
 
@@ -72,8 +71,6 @@ void setup() {
   printDirectory(SD.open("/"), 0);
 
   // SETUP for baby
-  pinMode(MotionLED, OUTPUT);
-  digitalWrite(MotionLED, LOW);
   
   pinMode(RelayEYEs, OUTPUT);
   digitalWrite(RelayEYEs, HIGH);  // relays are OFF when HIGH
@@ -89,7 +86,7 @@ void setup() {
 
   
   // Set volume for left, right channels. lower numbers == louder volume!
-  musicPlayer.setVolume(10,10);
+  musicPlayer.setVolume(15,15);
 
   /***** Two interrupt options! *******/ 
   // This option uses timer0, this means timer1 & t2 are not required
@@ -131,12 +128,34 @@ void loop() {
   while(digitalRead(MotionDETECT) == LOW){
     delay(1000); // do nothing for 1s
   }
+  Serial.println("Motion Found!");
 
-  musicPlayer.sineTest(0x44, 500);    // Make a tone on movement (TEMP)
-  delay(10000);
+  Serial.println("Playing Giggles");
+  musicPlayer.playFullFile("giggles1.wav");
 
+  Serial.println("Playing Scream!");
+  musicPlayer.startPlayingFile("scream.mp3");
+
+  Serial.println("Extending Cylinder");
+  digitalWrite(RelayEXTEND, LOW);
+  delay(100);
+  digitalWrite(RelayEXTEND, HIGH);
+  delay(100);
+  Serial.println("Turning on Eyes");
+  digitalWrite(RelayEYEs, LOW);
+  while(musicPlayer.playingMusic){
+    delay(100);
+  }
+  delay(5000);
+  Serial.println("Scare Complete!");
+  digitalWrite(RelayEYEs, HIGH);
+  digitalWrite(RelayRETRACT, LOW);
+  delay(100);
+  digitalWrite(RelayRETRACT, HIGH);
   
-  
+  Serial.println("Entering reset delay");
+  delay(20000);
+  Serial.println("Finished with reset delay.");
 }
 
 
